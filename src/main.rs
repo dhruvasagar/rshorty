@@ -1,5 +1,7 @@
 use std::process;
 use server::Server;
+use tracing::subscriber::set_global_default;
+use tracing_subscriber::FmtSubscriber;
 
 #[macro_use]
 pub mod macros;
@@ -10,6 +12,9 @@ mod server;
 
 #[tokio::main]
 async fn main() {
+    let subscriber = FmtSubscriber::new();
+    set_global_default(subscriber).expect("Failed to set subscriber");
+
     let pool = match db::connect(&std::env::var("DATABASE_URL").unwrap()).await {
         Ok(p) => p,
         Err(_e) => {
