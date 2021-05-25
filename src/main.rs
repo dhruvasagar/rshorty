@@ -1,6 +1,6 @@
 use server::Server;
-use reactor::Reactor;
-use std::sync::Arc;
+// use reactor::Reactor;
+// use std::sync::Arc;
 
 #[macro_use]
 pub mod macros;
@@ -9,7 +9,7 @@ mod db;
 mod models;
 mod types;
 mod server;
-mod reactor;
+// mod reactor;
 
 #[tokio::main]
 async fn main() {
@@ -21,18 +21,10 @@ async fn main() {
     };
 
     let (db_tx, db_rx) = tokio::sync::mpsc::channel(32);
-    let (sv_tx, sv_rx) = tokio::sync::mpsc::channel(32);
 
     tokio::spawn(async {
         let mut db_manager = db::DBManager::new(pool, db_rx);
         db_manager.listen().await;
-    });
-
-    tokio::spawn(async move {
-        let server = Server::new(sv_tx);
-        let port = (std::env::var("PORT").unwrap_or("3000".to_string())).parse::<i64>().expect("PORT is not a number?");
-        let host = std::env::var("HOST").unwrap_or("127.0.0.1".to_string());
-        server.listen(host, port).await;
     });
 
     tokio::spawn(async move {
@@ -54,15 +46,23 @@ async fn main() {
         }
     });
 
-    let _ = tokio::spawn(async {
-        let server_receiver = Arc::new(tokio::sync::Mutex::new(sv_rx));
-        let (tx, rx) = tokio::sync::mpsc::channel(128);
-        let mut reactor = Reactor {
-            db_sender: db_tx,
-            server_receiver,
-            inner_sender: tx,
-        };
-        reactor.listen(rx).await;
+    let _ = tokio::spawn(async move {
+        let server = Server::new(db_tx);
+        let port = (std::env::var("PORT").unwrap_or("3000".to_string())).parse::<i64>().expect("PORT is not a number?");
+        let host = std::env::var("HOST").unwrap_or("127.0.0.1".to_string());
+        server.listen(host, port).await;
     })
     .await;
+
+//     let _ = tokio::spawn(async {
+//         let server_receiver = Arc::new(tokio::sync::Mutex::new(sv_rx));
+//         let (tx, rx) = tokio::sync::mpsc::channel(128);
+//         let mut reactor = Reactor {
+//             db_sender: db_tx,
+//             server_receiver,
+//             inner_sender: tx,
+//         };
+//         reactor.listen(rx).await;
+//     })
+//     .await;
 }

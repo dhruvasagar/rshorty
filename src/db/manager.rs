@@ -20,13 +20,9 @@ impl DBManager {
         conn: &mut Connection,
         url_map: UrlMapModel,
     ) -> Result<UrlMapModel, sqlx::Error> {
-        let row = sqlx::query_as!(UrlMapModel, r#"
-                INSERT INTO url_maps (key, url)
-                VALUES ($1, $2)
-            "#,
-            url_map.key,
-            url_map.url
-            )
+        let row = sqlx::query_as::<_, UrlMapModel>("INSERT INTO url_maps (key, url) VALUES (?, ?) RETURNING *")
+            .bind(url_map.key)
+            .bind(url_map.url)
             .fetch_one(conn).await;
         return row;
     }
@@ -35,7 +31,8 @@ impl DBManager {
         conn: &mut Connection,
         key: String,
     ) -> Result<UrlMapModel, sqlx::Error> {
-        let url_map = sqlx::query_as!(UrlMapModel, "SELECT * FROM url_maps WHERE id = $1", key)
+        let url_map = sqlx::query_as::<_, UrlMapModel>("SELECT * FROM url_maps WHERE key = ?")
+            .bind(key)
             .fetch_one(conn)
             .await;
         return url_map;
@@ -46,13 +43,8 @@ impl DBManager {
         offset: Option<i64>,
     ) -> Result<Vec<UrlMapModel>, sqlx::Error> {
         let offset = offset.unwrap_or(0);
-        let url_maps = sqlx::query_as!(UrlMapModel, r#"
-            SELECT * FROM url_maps
-            LIMIT 100
-            OFFSET $1
-            "#,
-            offset
-            )
+        let url_maps = sqlx::query_as::<_, UrlMapModel>("SELECT * FROM url_maps LIMIT 100 OFFSET ?")
+            .bind(offset)
             .fetch_all(conn)
             .await;
         return url_maps;
@@ -62,14 +54,9 @@ impl DBManager {
         conn: &mut Connection,
         url_map: UrlMapModel,
     ) -> Result<UrlMapModel, sqlx::Error> {
-        let row = sqlx::query_as!(UrlMapModel, r#"
-            UPDATE url_maps
-            SET url = $2
-            WHERE key = $1
-            "#,
-            url_map.key,
-            url_map.url
-            )
+        let row = sqlx::query_as::<_, UrlMapModel>("UPDATE url_maps SET url = ? WHERE key = ? RETURNING *")
+            .bind(url_map.url)
+            .bind(url_map.key)
             .fetch_one(conn)
             .await;
         row
@@ -79,11 +66,8 @@ impl DBManager {
         conn: &mut Connection,
         key: String,
     ) -> Result<UrlMapModel, sqlx::Error> {
-        let row = sqlx::query_as!(
-            UrlMapModel,
-            "DELETE FROM url_maps where key = $1",
-            key
-            )
+        let row = sqlx::query_as::<_, UrlMapModel>("DELETE FROM url_maps where key = ?")
+            .bind(key)
             .fetch_one(conn)
             .await;
         row
@@ -94,7 +78,6 @@ impl DBManager {
         while let Some(message) = self.rx.recv().await {
             info!("Got a {} message", message.get_type());
             let mut connection = self.pool.acquire().await.unwrap();
-            let pool = self.pool.clone();
             tokio::spawn(async move {
                 match message {
                     DBMessage::GetUrlMaps { offset, resp } => {

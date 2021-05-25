@@ -26,14 +26,14 @@ pub enum ServerMessage {
     },
 }
 
-impl ServerMessage {
-    pub fn get_type<'a>(&'a self) -> &'a str {
-        return match self {
-            ServerMessage::GetUrlMap { .. } => "GetUrlMap",
-            ServerMessage::GetUrlMaps { .. } => "GetUrlMaps",
-            ServerMessage::CreateUrlMap { .. } => "CreateUrlMap",
-            ServerMessage::UpdateUrlMap { .. } => "UpdateUrlMap",
-            ServerMessage::DeleteUrlMap { .. } => "DeleteUrlMap",
-        };
-    }
-}
+// impl ServerMessage {
+//     pub fn get_type<'a>(&'a self) -> &'a str {
+//         return match self {
+//             ServerMessage::GetUrlMap { .. } => "GetUrlMap",
+//             ServerMessage::GetUrlMaps { .. } => "GetUrlMaps",
+//             ServerMessage::CreateUrlMap { .. } => "CreateUrlMap",
+//             ServerMessage::UpdateUrlMap { .. } => "UpdateUrlMap",
+//             ServerMessage::DeleteUrlMap { .. } => "DeleteUrlMap",
+//         };
+//     }
+// }

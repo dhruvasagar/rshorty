@@ -1,5 +1,5 @@
-use hyper::{http::Error, Body};
-use routerify::Router;
+use hyper::Body;
+use routerify::{Error, Router};
 
 mod v1;
 

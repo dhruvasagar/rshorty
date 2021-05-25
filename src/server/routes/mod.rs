@@ -2,11 +2,11 @@ use hyper::{
     Body,
     Request,
     Response,
-    http::Error
 };
 use routerify::{
-    Middleware,
+    Error,
     Router,
+    Middleware,
     RequestInfo,
     RouterBuilder
 };

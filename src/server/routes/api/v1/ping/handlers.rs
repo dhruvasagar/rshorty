@@ -2,8 +2,8 @@ use hyper::{
     Body,
     Request,
     Response,
-    http::Error,
 };
+use routerify::Error;
 
 pub async fn ping_get(_: Request<Body>) -> Result<Response<Body>, Error> {
     json!(body: "Hello Ping")

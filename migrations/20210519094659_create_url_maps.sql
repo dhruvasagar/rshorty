@@ -1,5 +1,5 @@
 -- Add migration script here
-CREATE TABLE url_maps (
+CREATE TABLE IF NOT EXISTS url_maps (
   key TEXT PRIMARY KEY,
-  url TEXT
+  url TEXT NOT NULL
 );

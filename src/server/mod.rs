@@ -1,25 +1,27 @@
 use hyper::Server as HyperServer;
 use routerify::RouterService;
-use std::{net::SocketAddr, str::FromStr};
+use std::{
+    str::FromStr,
+    net::SocketAddr,
+};
 use tokio::sync::mpsc::Sender;
 use tracing::{error, info};
+use crate::db::DBMessage;
 
 mod routes;
-mod messages;
-pub use messages::ServerMessage;
 
 pub struct Server {
-    message_sender: Sender<ServerMessage>,
+    db_sender: Sender<DBMessage>,
 }
 
 impl Server {
-    pub fn new(message_sender: Sender<ServerMessage>) -> Self {
-        Self { message_sender }
+    pub fn new(db_sender: Sender<DBMessage>) -> Self {
+        Self { db_sender }
     }
 
     pub async fn listen(&self, host: String, port: i64) {
         let router = routes::router()
-            .data(self.message_sender.clone())
+            .data(self.db_sender.clone())
             .build()
             .unwrap();
         let service = RouterService::new(router).unwrap();
