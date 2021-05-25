@@ -1,6 +1,5 @@
+use std::process;
 use server::Server;
-// use reactor::Reactor;
-// use std::sync::Arc;
 
 #[macro_use]
 pub mod macros;
@@ -9,7 +8,6 @@ mod db;
 mod models;
 mod types;
 mod server;
-// mod reactor;
 
 #[tokio::main]
 async fn main() {
@@ -43,6 +41,7 @@ async fn main() {
             }
 
             println!("Goodbye!");
+            process::exit(0);
         }
     });
 
@@ -53,16 +52,4 @@ async fn main() {
         server.listen(host, port).await;
     })
     .await;
-
-//     let _ = tokio::spawn(async {
-//         let server_receiver = Arc::new(tokio::sync::Mutex::new(sv_rx));
-//         let (tx, rx) = tokio::sync::mpsc::channel(128);
-//         let mut reactor = Reactor {
-//             db_sender: db_tx,
-//             server_receiver,
-//             inner_sender: tx,
-//         };
-//         reactor.listen(rx).await;
-//     })
-//     .await;
 }
