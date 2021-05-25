@@ -1,5 +1,4 @@
 use crate::models::UrlMapModel;
-use crate::types::OneShotMessageResponse;
 
 #[derive(Debug)]
 pub enum DBMessage {
@@ -37,4 +36,4 @@ impl DBMessage {
     }
 }
 
-pub type DBMessageResponse<T> = OneShotMessageResponse<Result<T, sqlx::Error>>;
+pub type DBMessageResponse<T> = tokio::sync::oneshot::Sender<Result<T, sqlx::Error>>;

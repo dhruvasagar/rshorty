@@ -34,7 +34,7 @@ async fn logger_middleware(req: Request<Body>) -> Result<Request<Body>, Error> {
 }
 
 async fn home_get(_: Request<Body>) -> Result<Response<Body>, Error> {
-    json!(body: "Rshorty!")
+    Ok(Response::new(Body::from("rshorty!")))
 }
 
 async fn error_handler(err: routerify::RouteError, _: RequestInfo) -> Response<Body> {

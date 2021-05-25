@@ -1,5 +1,4 @@
 use crate::models::UrlMapModel;
-use crate::types::OneShotMessageResponse;
 
 pub enum ReactorMessage {
     ServerGetUrlMap {
@@ -26,7 +25,7 @@ pub enum ReactorMessage {
     },
 }
 
-type ComposedResponse<T> = OneShotMessageResponse<Result<T, sqlx::Error>>;
+type ComposedResponse<T> = tokio::sync::oneshot::Sender<Result<T, sqlx::Error>>;
 
 impl ReactorMessage {
     pub fn get_type<'a>(&'a self) -> &'a str {

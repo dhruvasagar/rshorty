@@ -6,7 +6,6 @@ pub mod macros;
 
 mod db;
 mod models;
-mod types;
 mod server;
 
 #[tokio::main]
