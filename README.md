@@ -11,6 +11,10 @@ programming language
 * [Rust](https://rust-lang.org)
 * `sqlx-cli` to create the database (sqlite) using `sqlx database create`
   assuming env `DATABASE_URL` is set
+  This can be installed with cargo.
+  ```sh
+  $ cargo install sqlx-cli
+  ```
 * `Sqlite` (optional)
 * Docker (optional), easier to build & run the project in a container
 
