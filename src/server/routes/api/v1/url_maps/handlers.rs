@@ -132,5 +132,18 @@ pub async fn delete_url_map(req: Request<Body>) -> Result<Response<Body>, Error>
             resp: tx,
         })
         .await, "DeleteUrlMap");
-    return match_result!(rx.await.unwrap());
+    match rx.await.unwrap() {
+        Ok(_) => {
+            let obj = serde_json::json!({
+                "ok": "true"
+            }).to_string();
+            json!(status: hyper::StatusCode::OK, body: &obj)
+        }
+        Err(e) => {
+            let obj = serde_json::json!({
+                "error": e.to_string()
+            }).to_string();
+            json!(status: hyper::StatusCode::NOT_FOUND, body: &obj)
+        }
+    }
 }

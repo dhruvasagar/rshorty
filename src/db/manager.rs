@@ -66,7 +66,7 @@ impl DBManager {
         conn: &mut Connection,
         key: String,
     ) -> Result<UrlMapModel, sqlx::Error> {
-        let row = sqlx::query_as::<_, UrlMapModel>("DELETE FROM url_maps where key = ?")
+        let row = sqlx::query_as::<_, UrlMapModel>("DELETE FROM url_maps where key = ? RETURNING *")
             .bind(key)
             .fetch_one(conn)
             .await;
