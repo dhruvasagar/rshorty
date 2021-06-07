@@ -3,18 +3,25 @@ mod messages;
 pub use manager::DBManager;
 pub use messages::DBMessage;
 use sqlx::{Pool, Sqlite, sqlite::SqlitePoolOptions, migrate};
+use anyhow::{Result, Context};
+use crate::config::CONFIG;
 
-pub async fn connect<'a>(db_url: &'a str) -> Result<Pool<Sqlite>, sqlx::Error> {
-    let pool = SqlitePoolOptions::new()
-        .connect(db_url)
-        .await?;
+pub struct DB {
+    pub pool: Pool<Sqlite>,
+}
 
-    let migrator = migrate!();
-    match migrator.run(&pool).await {
-        Ok(_) => {},
-        Err(e) => {
-            panic!("Couldn't migrate!, {}", e.to_string());
-        }
-    };
-    Ok(pool)
+impl DB {
+    pub async fn new() -> Result<Self> {
+        let pool = SqlitePoolOptions::new()
+            .connect(&CONFIG.database.url)
+            .await
+            .context("Unable to connect to database")?;
+
+        let migrator = migrate!();
+        migrator
+            .run(&pool)
+            .await
+            .context("Unable to run migrations")?;
+        Ok(Self{pool})
+    }
 }

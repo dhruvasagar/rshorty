@@ -5,8 +5,12 @@ use std::{
     net::SocketAddr,
 };
 use tokio::sync::mpsc::Sender;
-use tracing::{error, info};
-use crate::db::DBMessage;
+use tracing::info;
+use anyhow::{Result, Context};
+use crate::{
+    db::DBMessage,
+    config::CONFIG,
+};
 
 mod routes;
 
@@ -19,18 +23,19 @@ impl Server {
         Self { db_sender }
     }
 
-    pub async fn listen(&self, host: String, port: i64) {
+    pub async fn listen(&self) -> Result<()> {
         let router = routes::router()
             .data(self.db_sender.clone())
             .build()
             .unwrap();
         let service = RouterService::new(router).unwrap();
-        let addr = SocketAddr::from_str(format!("{}:{}", host, port).as_str())
+        let addr = SocketAddr::from_str(format!("{}:{}", CONFIG.host, CONFIG.port).as_str())
             .expect("Invalid host or port.");
+
         let server = HyperServer::bind(&addr).serve(service);
         info!("Server started listening on {}", addr);
-        if let Err(err) = server.await {
-            error!("Server error: {}", err);
-        }
+        server.await.context("Unable to start server")?;
+
+        Ok(())
     }
 }

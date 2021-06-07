@@ -2,30 +2,28 @@ use std::process;
 use server::Server;
 use tracing::subscriber::set_global_default;
 use tracing_subscriber::FmtSubscriber;
+use anyhow::{Result, Context};
+use crate::db::DB;
 
 #[macro_use]
 pub mod macros;
 
 mod db;
+mod config;
 mod models;
 mod server;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
     let subscriber = FmtSubscriber::new();
     set_global_default(subscriber).expect("Failed to set subscriber");
 
-    let pool = match db::connect(&std::env::var("DATABASE_URL").unwrap()).await {
-        Ok(p) => p,
-        Err(_e) => {
-            panic!("Database connection failed. Check if your connection URL is correct and your DB is reachable.")
-        }
-    };
 
+    let db = DB::new().await.context("Unable to connect to database")?;
     let (db_tx, db_rx) = tokio::sync::mpsc::channel(32);
 
-    tokio::spawn(async {
-        let mut db_manager = db::DBManager::new(pool, db_rx);
+    tokio::spawn(async move {
+        let mut db_manager = db::DBManager::new(db, db_rx);
         db_manager.listen().await;
     });
 
@@ -49,11 +47,7 @@ async fn main() {
         }
     });
 
-    let _ = tokio::spawn(async move {
-        let server = Server::new(db_tx);
-        let port = (std::env::var("PORT").unwrap_or("3000".to_string())).parse::<i64>().expect("PORT is not a number?");
-        let host = std::env::var("HOST").unwrap_or("127.0.0.1".to_string());
-        server.listen(host, port).await;
-    })
-    .await;
+    Server::new(db_tx).listen().await?;
+
+    Ok(())
 }

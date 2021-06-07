@@ -1,19 +1,19 @@
-use sqlx::{pool::PoolConnection, Pool, Sqlite};
+use sqlx::{pool::PoolConnection, Sqlite};
 use tokio::sync::mpsc::Receiver;
-use crate::models::UrlMapModel;
+use crate::{db::DB, models::UrlMapModel};
 use super::DBMessage;
 use tracing::{error, info};
 
 pub struct DBManager {
-    pool: Pool<Sqlite>,
+    db: DB,
     rx: Receiver<DBMessage>,
 }
 
 type Connection = PoolConnection<Sqlite>;
 
 impl DBManager {
-    pub fn new(pool: Pool<Sqlite>, rx: Receiver<DBMessage>) -> Self {
-        Self { pool, rx }
+    pub fn new(db: DB, rx: Receiver<DBMessage>) -> Self {
+        Self { db, rx }
     }
 
     pub async fn create_url_map(
@@ -77,7 +77,8 @@ impl DBManager {
         info!("DBManager started listening for messages.");
         while let Some(message) = self.rx.recv().await {
             info!("Got a {} message", message.get_type());
-            let mut connection = self.pool.acquire().await.unwrap();
+            let pool = self.db.pool.clone();
+            let mut connection = pool.acquire().await.unwrap();
             tokio::spawn(async move {
                 match message {
                     DBMessage::GetUrlMaps { offset, resp } => {
