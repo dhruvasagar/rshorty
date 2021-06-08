@@ -6,7 +6,7 @@ use anyhow::{Result, Context};
 use crate::db::DB;
 
 #[macro_use]
-pub mod macros;
+mod macros;
 
 mod db;
 mod config;

@@ -1,16 +1,10 @@
+use crate::{config::CONFIG, db::DBMessage};
+use anyhow::{Context, Result};
 use hyper::Server as HyperServer;
 use routerify::RouterService;
-use std::{
-    str::FromStr,
-    net::SocketAddr,
-};
+use std::{net::SocketAddr, str::FromStr};
 use tokio::sync::mpsc::Sender;
 use tracing::info;
-use anyhow::{Result, Context};
-use crate::{
-    db::DBMessage,
-    config::CONFIG,
-};
 
 mod routes;
 
@@ -29,7 +23,7 @@ impl Server {
             .build()
             .unwrap();
         let service = RouterService::new(router).unwrap();
-        let addr = SocketAddr::from_str(format!("{}:{}", CONFIG.host, CONFIG.port).as_str())
+        let addr = SocketAddr::from_str(&format!("{}:{}", CONFIG.host, CONFIG.port))
             .expect("Invalid host or port.");
 
         let server = HyperServer::bind(&addr).serve(service);
