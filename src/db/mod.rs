@@ -22,6 +22,7 @@ impl DB {
             .run(&pool)
             .await
             .context("Unable to run migrations")?;
+
         Ok(Self{pool})
     }
 }

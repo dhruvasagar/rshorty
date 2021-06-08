@@ -4,6 +4,7 @@ use tracing::subscriber::set_global_default;
 use tracing_subscriber::FmtSubscriber;
 use anyhow::{Result, Context};
 use crate::db::DB;
+use tracing::info;
 
 #[macro_use]
 mod macros;
@@ -16,7 +17,7 @@ mod server;
 #[tokio::main]
 async fn main() -> Result<()> {
     let subscriber = FmtSubscriber::new();
-    set_global_default(subscriber).expect("Failed to set subscriber");
+    set_global_default(subscriber).context("Unable to set subscriber")?;
 
 
     let db = DB::new().await.context("Unable to connect to database")?;
@@ -42,7 +43,7 @@ async fn main() -> Result<()> {
                 v = term.recv() => v.unwrap(),
             }
 
-            println!("Goodbye!");
+            info!("Good Bye!");
             process::exit(0);
         }
     });

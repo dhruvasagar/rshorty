@@ -50,6 +50,7 @@ macro_rules! recv_dropped {
 #[macro_export]
 macro_rules! sender_failed {
     ($send: expr, $msg: tt) => {
+        use tracing::error;
         match $send {
             Ok(_) => {}
             Err(e) => {
