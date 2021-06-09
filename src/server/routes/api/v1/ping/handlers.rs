@@ -3,12 +3,12 @@ use hyper::{
     Request,
     Response,
 };
-use routerify::Error;
+use anyhow::Result;
 
-pub async fn ping_get(_: Request<Body>) -> Result<Response<Body>, Error> {
+pub async fn ping_get(_: Request<Body>) -> Result<Response<Body>> {
     json!(body: "Hello Ping")
 }
 
-pub async fn pong_get(_: Request<Body>) -> Result<Response<Body>, Error> {
+pub async fn pong_get(_: Request<Body>) -> Result<Response<Body>> {
     json!(body: "Hello Pong")
 }

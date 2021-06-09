@@ -6,7 +6,7 @@ macro_rules! json {
             .body(serde_json::to_string($body).unwrap().into())
         {
             Ok(x) => Ok(x),
-            Err(e) => Err(routerify::Error::new(e.to_string())),
+            Err(e) => Err(anyhow::anyhow!(e.to_string())),
         }
     };
     (status: $status:expr, body: $body:expr) => {
@@ -16,7 +16,7 @@ macro_rules! json {
             .body(serde_json::to_string($body).unwrap().into())
         {
             Ok(x) => Ok(x),
-            Err(e) => Err(routerify::Error::new(e.to_string())),
+            Err(e) => Err(anyhow::anyhow!(e.to_string())),
         }
     };
 }
@@ -43,24 +43,6 @@ macro_rules! recv_dropped {
         match $m {
             Ok(_) => {}
             Err(_) => error!("Receiver was dropped for: {}", $f),
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! sender_failed {
-    ($send: expr, $msg: tt) => {
-        use tracing::error;
-        match $send {
-            Ok(_) => {}
-            Err(e) => {
-                error!(
-                    "DBManager didnt receive the {} message! Either it's failed or didn't start.",
-                    $msg
-                );
-                error!("{}", e.to_string());
-                return Err(routerify::Error::new(e.to_string()));
-            }
         }
     };
 }

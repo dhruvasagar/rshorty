@@ -1,5 +1,6 @@
 use hyper::Body;
-use routerify::{Error, Router};
+use anyhow::Error;
+use routerify::Router;
 
 mod ping;
 mod url_maps;

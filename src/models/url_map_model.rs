@@ -1,6 +1,6 @@
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
-#[derive(sqlx::FromRow, Debug, Clone, Serialize)]
+#[derive(sqlx::FromRow, Debug, Clone, Serialize, Deserialize)]
 pub struct UrlMapModel {
     pub key: String,
     pub url: String,

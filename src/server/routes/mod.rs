@@ -4,7 +4,6 @@ use hyper::{
     Response,
 };
 use routerify::{
-    Error,
     Router,
     Middleware,
     RequestInfo,
@@ -17,6 +16,7 @@ use crate::{
     db::DBMessage,
     models::UrlMapModel,
 };
+use anyhow::{Error, Result};
 
 mod api;
 
@@ -29,7 +29,7 @@ pub fn router() -> RouterBuilder<Body, Error> {
         .err_handler_with_info(error_handler)
 }
 
-async fn logger_middleware(req: Request<Body>) -> Result<Request<Body>, Error> {
+async fn logger_middleware(req: Request<Body>) -> Result<Request<Body>> {
     info!(
         "{} {} {}",
         req.remote_addr(),
@@ -39,21 +39,18 @@ async fn logger_middleware(req: Request<Body>) -> Result<Request<Body>, Error> {
     Ok(req)
 }
 
-async fn home_get(_: Request<Body>) -> Result<Response<Body>, Error> {
+async fn home_get(_: Request<Body>) -> Result<Response<Body>> {
     Ok(Response::new(Body::from("rshorty!")))
 }
 
-async fn redirect(req: Request<Body>) -> Result<Response<Body>, Error> {
+async fn redirect(req: Request<Body>) -> Result<Response<Body>> {
     let (tx, rx) = tokio::sync::oneshot::channel();
     let sender = req.data::<Sender<DBMessage>>().unwrap();
     let key = req.param("key").unwrap().to_string();
-    sender_failed!(
-        sender
-        .send(DBMessage::GetUrlMap {
-            key: key.clone(),
-            resp: tx,
-        })
-        .await, "GetUrlMap");
+    sender.send(DBMessage::GetUrlMap {
+        key: key.clone(),
+        resp: tx,
+    }).await?;
     let url_map = rx.await.unwrap();
     let url_map = match url_map {
         Ok(u) => u,
@@ -67,7 +64,7 @@ async fn redirect(req: Request<Body>) -> Result<Response<Body>, Error> {
         .body(Body::from("redirecting..."))
         {
             Ok(x) => Ok(x),
-            Err(e) => Err(routerify::Error::new(e.to_string())),
+            Err(e) => Err(anyhow::anyhow!(e.to_string())),
         }
 }
 

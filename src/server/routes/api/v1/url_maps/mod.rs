@@ -1,5 +1,7 @@
 use hyper::Body;
-use routerify::{Error, Router};
+use anyhow::Error;
+use routerify::Router;
+
 pub mod handlers;
 
 pub fn router() -> Router<Body, Error> {
