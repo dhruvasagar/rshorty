@@ -53,8 +53,7 @@ macro_rules! empty_malformed_body {
         return {
             let obj = serde_json::json!({
                 "error": "Body is malformed/empty, please try again."
-            });
-            let obj = obj.to_string();
+            }).to_string();
             json!(status: hyper::StatusCode::BAD_REQUEST, body: &obj)
         };
     }
